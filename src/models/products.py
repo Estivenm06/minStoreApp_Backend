@@ -13,9 +13,9 @@ class Products(Base):
     stock = Column(Float, nullable=False)
     id_category = Column(ForeignKey('categories.id'), nullable=False)
     id_supplier = Column(ForeignKey('suppliers.id'), nullable=False)
-    active = Column(Boolean, nullable=False, default=1)
+    active = Column(Boolean, nullable=False, default=1) # 1 for active, 0 for inactive
 
-    def __init__(self, name, barcode, description, price_sell, price_buy, stock, id_category, id_supplier):
+    def __init__(self, name, barcode, description, price_sell, price_buy, id_category, id_supplier, stock=0):
         self.name = name
         self.barcode = barcode
         self.description = description
@@ -32,6 +32,15 @@ class Products(Base):
     def get_all():
         return session.query(Products).all()
 
+    def get_by_id(product_id):
+        return session.query(Products).filter_by(id=product_id).first()
+
+    def get_by_name(product_name):
+        return session.query(Products).filter_by(name=product_name).first()
+
     def create_product(self):
         session.add(self)
+        session.commit()
+
+    def update_product(self):
         session.commit()
