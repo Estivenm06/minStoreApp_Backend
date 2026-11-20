@@ -2,13 +2,18 @@ from flask import Blueprint, jsonify, request
 from src.models.products import Products
 from src.utils.helper import validator_data
 
-products_bp = Blueprint('products', __name__)
+products_bp = Blueprint('products_v1', __name__, url_prefix='/api/v1')
 
 @products_bp.route('/products', methods=['GET'])
 def get_products():
+    page = request.args.get('page', default=1, type=int)
+    per_page = request.args.get('per_page', default=3, type=int)
+    products, total_products = Products.get_paginated(page, per_page)    
+    total_pages = (total_products + per_page - 1) // per_page # Calculate total pages
 
-    products = Products.get_all()    
-    return jsonify([{
+    return jsonify({
+        'products' : 
+        [{
         'id': product.id,
         'barcode': product.barcode,
         'name': product.name,
@@ -19,7 +24,16 @@ def get_products():
         'id_category': product.id_category,
         'id_supplier': product.id_supplier,
         'active': product.active
-    } for product in products])
+    } for product in products],
+    'meta': {
+        'page': page,
+        'per_page': per_page,
+        'total_products': total_products,
+        'total_pages': total_pages,
+        'has_next': page < total_pages,
+        'has_prev': page > 1
+    }
+    }), 200
 
 @products_bp.route('/products/<int:product_id>', methods=['GET'])
 def get_product(product_id):
@@ -49,7 +63,7 @@ def create_product():
 
     data = request.get_json()
     
-    validation_error = validator_data(['name', 'barcode', 'price_sell', 'price_buy', 'id_category', 'id_supplier'], data)
+    validation_error = validator_data(['name', 'barcode', 'price_sell', 'price_buy', 'id_category', 'id_supplier'], data, update=False)
     if validation_error:
         return validation_error
         
@@ -90,16 +104,16 @@ def update_product(product_id):
         }), 404
 
     data = request.get_json()
-    validation_error = validator_data(['name', 'barcode', 'price_sell', 'price_buy', 'id_category', 'id_supplier'], data, update=False)
+    validation_error = validator_data(['name', 'barcode', 'price_sell', 'price_buy', 'id_category', 'id_supplier'], data, update=True)
 
     if validation_error:
         return validation_error
 
     for key in ['name', 'barcode', 'description', 'price_sell', 'price_buy', 'stock', 'id_category', 'id_supplier']:
         if key in data:
-            print(f"Updating {key} to {data[key]}")
             setattr(product, key, data[key])
-    #product.update_product()
+    
+    product.update_product()
 
     return jsonify({
         'id': product.id,

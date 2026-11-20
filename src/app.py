@@ -3,17 +3,21 @@ from src.models import Base, engine
 from src.models.products import Products
 from src.models.categories import Categories
 from src.models.suppliers import Suppliers
-from src.routes.products_routes import products_bp
+
+from src.routes import register_routes
 
 app = Flask(__name__)
 
-app.register_blueprint(products_bp)
-
+register_routes(app)
+ 
 Base.metadata.create_all(engine)
 
 @app.route('/')
-def hello_world():
-    return 'Hello, World!'
+def health():
+    return {
+        'success': True,
+        "health": "OK",
+    }
 
 
 if __name__ == '__main__':

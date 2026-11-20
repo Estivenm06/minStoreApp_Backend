@@ -2,6 +2,7 @@ from flask import jsonify
 from src.models.products import Products
 
 def validator_data(required_fields, data, update):
+    errors = []
     if not data:
         return jsonify({
             'success': False,
@@ -9,29 +10,24 @@ def validator_data(required_fields, data, update):
             'validation_error': 'Request body is empty or not in JSON format'
         }), 400
 
-    return fields_validator(required_fields, data, update)
-
-def fields_validator(required_fields, data, update):
-    errors = []
     for key in required_fields:
         if key not in data:
             errors.append({key: f'{key} is required'})
         else:
             existing_product = Products.get_by_name(data['name']) if key == 'name' else None
             if update and existing_product:
-                errors.append({key: f"{data[key]} must be unique"})
+                errors.append({key: f"{data[key]} already exists"})
             if not update and existing_product:
-                 errors.append({key: f"{data[key]} already exists"})
-            
+                errors.append({key: f"{data[key]} must be unique"})
 
     for key in ['price_sell', 'price_buy', 'id_category', 'id_supplier']:
         if key in data:
-                    try:
-                        data[key] = int(data[key])
-                        if data[key] < 0:
-                            errors.append({key: f'{key} must be a non-negative integer'})
-                    except ValueError:
-                        errors.append({key: f'{key} must be an integer'})
+            try:
+                data[key] = int(data[key])
+                if data[key] < 0:
+                    errors.append({key: f'{key} must be a non-negative integer'})
+            except ValueError:
+                errors.append({key: f'{key} must be an integer'})
 
     if errors:
         return jsonify({
