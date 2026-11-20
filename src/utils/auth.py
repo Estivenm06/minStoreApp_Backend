@@ -2,9 +2,9 @@ from datetime import UTC, datetime, timedelta
 from functools import wraps
 
 import jwt
-from flask import current_app, jsonify, request, g
+from flask import current_app, g, jsonify, request
 
-from src.models.users import Users
+from src.models.users import Role, Users
 
 
 def generate_token(user, expires_in_hours=2):
@@ -24,7 +24,8 @@ def token_required(f):
         token = None
         if 'Authorization' in request.headers:
             auth_header = request.headers['Authorization']
-            if auth_header.startswith('Bearer '):
+            auth_header = auth_header.strip()  # Remove leading/trailing whitespace
+            if auth_header.lower().startswith('bearer'):
                 token = auth_header.split(' ')[1]
         if not token:
             return jsonify({'success': False, 'error': 'Token is missing!'}), 401
@@ -43,3 +44,22 @@ def token_required(f):
         g.current_user = current_user
         return f(*args, **kwargs)
     return decorated
+
+def required_user(*roles):
+
+    allowed_roles = [role.value if isinstance(role, Role) else role for role in roles]
+
+    def decorator(f):
+        @wraps(f)
+        def decorated(*args, **kwargs):
+            current_user = getattr(g, 'current_user', None)
+            print(current_user.role.lower())
+            if current_user is None:
+                return jsonify({'success': False, 'error': 'You do not have the required permissions.'}), 401
+
+            if current_user.role.lower() not in allowed_roles:
+                return jsonify({'success': False, 'error': 'You do not have enough permissions to access this resource.'}), 403
+
+            return f(*args, **kwargs)
+        return decorated
+    return decorator

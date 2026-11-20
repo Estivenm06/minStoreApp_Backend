@@ -2,6 +2,7 @@ from sqlalchemy import Boolean, Column, Float, ForeignKey, Integer, String, func
 
 from src.models import Base, session
 
+
 class Products(Base):
     __tablename__ = 'products'
 

@@ -27,7 +27,6 @@ def register():
     if username and Users.get_user_by_username(username):
         errors.append('username already exists') 
 
-    print(errors)
     if errors:
         return jsonify({'success': False,'errors': errors}), 400
     new_user = Users(username, name, password, role)

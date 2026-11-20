@@ -12,7 +12,7 @@ from src.routes import register_routes
 app = Flask(__name__)
 
 register_routes(app)
-app.config['JWT_SECRET_KEY'] = 'your_secret_key'
+app.config['JWT_SECRET_KEY'] = '$|s?W%Y^w32dPbldOF?-uNS${vQCrw&n'
  
 Base.metadata.create_all(engine)
 
