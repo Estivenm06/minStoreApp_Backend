@@ -1,10 +1,13 @@
 from flask import Blueprint, jsonify, request
+
 from src.models.products import Products
+from src.utils.auth import token_required
 from src.utils.helper import validator_data
 
 products_bp = Blueprint('products_v1', __name__, url_prefix='/api/v1')
 
 @products_bp.route('/products', methods=['GET'])
+@token_required
 def get_products():
     page = request.args.get('page', default=1, type=int)
     per_page = request.args.get('per_page', default=3, type=int)
@@ -36,6 +39,7 @@ def get_products():
     }), 200
 
 @products_bp.route('/products/<int:product_id>', methods=['GET'])
+@token_required
 def get_product(product_id):
     product = Products.get_by_id(product_id)
 
@@ -59,6 +63,7 @@ def get_product(product_id):
     }), 200
 
 @products_bp.route('/products', methods=['POST'])
+@token_required
 def create_product():
 
     data = request.get_json()
@@ -94,6 +99,7 @@ def create_product():
     }), 201
 
 @products_bp.route('/products/<int:product_id>', methods=['PUT'])
+@token_required
 def update_product(product_id):
     product = Products.get_by_id(product_id)
 

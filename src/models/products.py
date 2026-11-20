@@ -1,4 +1,5 @@
-from sqlalchemy import Boolean, Column, Integer, Float, String, ForeignKey, func
+from sqlalchemy import Boolean, Column, Float, ForeignKey, Integer, String, func
+
 from src.models import Base, session
 
 class Products(Base):
