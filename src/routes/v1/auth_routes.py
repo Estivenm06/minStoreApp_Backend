@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 
-from src.models.users import Users
+from src.models.users import Role, Users
 from src.utils.auth import generate_token
 
 auth_bp = Blueprint('auth_v1', __name__, url_prefix='/api/v1')
@@ -15,9 +15,9 @@ def register():
 
     errors = []
 
-    [username, password, name, role] = [data.get('username'), data.get('password'), data.get('name'), data.get('role')]
+    [username, password, name] = [data.get('username'), data.get('password'), data.get('name')]
 
-    for field in ['username', 'password', 'name', 'role']:
+    for field in ['username', 'password', 'name']:
         if field not in data or not data[field]:
             errors.append(f"Missing field: {field}")
 
@@ -29,8 +29,7 @@ def register():
 
     if errors:
         return jsonify({'success': False,'errors': errors}), 400
-    new_user = Users(username, name, password, role)
-
+    new_user = Users(username, name, password, Role.PENDING.value)
     new_user.save()
 
     return jsonify({

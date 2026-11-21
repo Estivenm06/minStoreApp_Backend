@@ -53,7 +53,6 @@ def required_user(*roles):
         @wraps(f)
         def decorated(*args, **kwargs):
             current_user = getattr(g, 'current_user', None)
-            print(current_user.role.lower())
             if current_user is None:
                 return jsonify({'success': False, 'error': 'You do not have the required permissions.'}), 401
 

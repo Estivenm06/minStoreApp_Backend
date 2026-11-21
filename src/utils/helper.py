@@ -1,5 +1,7 @@
 from flask import jsonify
+
 from src.models.products import Products
+
 
 def validator_data(required_fields, data, update):
     errors = []

@@ -1,13 +1,18 @@
-from sqlalchemy import Boolean, Column, Integer, String
-from src.models import Base, session
-# Password hashing
-from werkzeug.security import generate_password_hash, check_password_hash
 import enum
+
+from sqlalchemy import Boolean, Column, Integer, String
+
+# Password hashing
+from werkzeug.security import check_password_hash, generate_password_hash
+
+from src.models import Base, session
+
 
 class Role(str, enum.Enum):
     ADMIN = 'admin'
     SELLER = 'seller'
     USER = 'user'
+    PENDING = 'pending'
 
 class Users(Base):
     __tablename__ = "users"
@@ -16,7 +21,7 @@ class Users(Base):
     username = Column(String(50), nullable=False, unique=True)
     name = Column(String(100), nullable=False)
     password_hash = Column(String(255), nullable=False)
-    role = Column(String(20), nullable=False, default=Role.SELLER.value)
+    role = Column(String(20), nullable=False)
     active = Column(Boolean, nullable=False, default=1)
 
 
@@ -38,6 +43,9 @@ class Users(Base):
 
     def save(self):
         session.add(self)
+        session.commit()
+
+    def update(self):
         session.commit()
 
     def login(self, password):
