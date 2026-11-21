@@ -28,7 +28,7 @@ def get_invoices():
         'invoices': [{
             'id': invoice.id,
             'id_user': invoice.id_user,
-            'date': invoice.date,
+            'date': invoice.date_issued,
             'total': invoice.total
         } for invoice in invoices],
         'meta': {
@@ -56,7 +56,7 @@ def get_invoice(invoice_id):
     return jsonify({
         'id': invoice.id,
         'id_user': invoice.id_user,
-        'date': invoice.date,
+        'date': invoice.date_issued,
         'total': invoice.total
     }), 200
 
@@ -80,7 +80,7 @@ def get_invoices_by_user(user_id):
         'invoices': [{
             'id': invoice.id,
             'id_user': invoice.id_user,
-            'date': invoice.date,
+            'date': invoice.date_issued,
             'total': invoice.total
         } for invoice in invoices],
         'meta': {

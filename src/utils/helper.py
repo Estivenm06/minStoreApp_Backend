@@ -34,6 +34,6 @@ def validator_data(required_fields, data, update):
     if errors:
         return jsonify({
             'success': False,
-            'message': 'Missing required fields',
-            'validation_error': f'Missing fields: {errors}'
+            'message': 'Validation error',
+            'validation_error': {errors}
         }), 400

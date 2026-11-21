@@ -37,6 +37,9 @@ class Suppliers(Base):
     def get_by_name(name):
         return session.query(Suppliers).filter_by(name=name).first()
 
+    def get_by_nit(nit):
+        return session.query(Suppliers).filter_by(nit=nit).first()
+
     def save(self):
         session.add(self)
         session.commit()

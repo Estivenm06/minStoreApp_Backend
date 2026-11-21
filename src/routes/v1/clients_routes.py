@@ -56,7 +56,7 @@ def get_client_by_id(client_id):
         return jsonify({'message': 'Client not found'}), 404
     return jsonify({
         'success': True,
-        'client': {'id': client.id, 'name': client.name, 'email': client.email, 'phone': client.phone, 'role': client.role}
+        'client': {'id': client.id, 'name': client.name, 'email': client.email, 'phone': client.phone_number, 'role': client.role}
     }), 200
 
 @clients_bp.route('/clients', methods=['POST'])
@@ -101,21 +101,46 @@ def create_client():
 @required_user(Role.ADMIN)
 def update_client(client_id):
     client = Clients.get_by_id(client_id)
+
     if not client:
         return jsonify({'message': 'Client not found'}), 404
 
     data = request.get_json()
 
-    if not data:
-        return jsonify({'message': 'No input data provided'}), 400
+    errors = []
 
-    for field in ['document', 'name', 'last_name', 'phone_number', 'email', 'address', 'active']:
-        if field == 'document' and data.get(field) and data.get(field) != client.document:
-            existing_client = Clients.get_by_document(data.get(field))
-            if existing_client:
-                return jsonify({'message': 'Client document already exists'}), 400
-        if field in data:
-            setattr(client, field, data[field])
+    if not data:
+        errors.append('No input data provided')
+
+    allowed_fields = ['document', 'name', 'last_name', 'phone_number', 'email', 'address', 'active']
+
+    changed = False
+
+    for field in allowed_fields:
+        if field not in data:
+            continue
+
+        new_value = data.get(field)
+        current_value = getattr(client, field)
+
+        if new_value != current_value:
+            changed = True
+
+            if field == 'document' and new_value:
+                existing_client = Clients.get_by_document(new_value)
+                if existing_client and existing_client.id != client.id:
+                    errors.append('Client document already exists')
+
+            setattr(client, field, new_value)
+
+    if not changed:
+        errors.append('No changes detected')
+
+    if errors:
+        return jsonify({
+            'success': False,
+            'errors': errors
+        }), 400
 
     client.update()
 
