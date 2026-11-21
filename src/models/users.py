@@ -12,6 +12,7 @@ class Role(str, enum.Enum):
     ADMIN = 'admin'
     SELLER = 'seller'
     USER = 'user'
+    CLIENT = 'client'
     PENDING = 'pending'
 
 class Users(Base):
