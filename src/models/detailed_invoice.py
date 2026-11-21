@@ -37,9 +37,9 @@ class DetailedInvoices(Base):
     def get_by_invoice_id(invoice_id):
         return session.query(DetailedInvoices).filter_by(id_invoice=invoice_id).all()
 
-    def create_invoice(self):
+    def save(self):
         session.add(self)
         session.commit()
 
-    def update_invoice(self):
+    def update(self):
         session.commit()

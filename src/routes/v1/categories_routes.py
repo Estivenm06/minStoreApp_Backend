@@ -1,13 +1,15 @@
 from flask import Blueprint, jsonify, request
 
 from src.models.categories import Categories
+from src.models.users import Role
 from src.utils.auth import required_user, token_required
+
 
 categories_bp = Blueprint('categories_v1', __name__, url_prefix='/api/v1')
 
 @categories_bp.route('/categories', methods=['GET'])
 @token_required
-@required_user('admin', 'seller', 'user', 'client')
+@required_user(Role.ADMIN, Role.SELLER)
 def get_categories():
     categories = Categories.get_all()
     print(categories)
@@ -21,7 +23,7 @@ def get_categories():
 
 @categories_bp.route('/categories/<int:category_id>', methods=['GET'])
 @token_required
-@required_user('admin', 'seller', 'user', 'client')
+@required_user(Role.ADMIN, Role.SELLER)
 def get_category_by_id(category_id):
     category = Categories.get_by_id(category_id)
     if not category:
@@ -33,7 +35,7 @@ def get_category_by_id(category_id):
 
 @categories_bp.route('/categories', methods=['POST'])
 @token_required
-@required_user('admin')
+@required_user(Role.ADMIN)
 def create_category():
     data = request.get_json()
 
@@ -69,7 +71,7 @@ def create_category():
 
 @categories_bp.route('/categories/<int:category_id>', methods=['PUT'])
 @token_required
-@required_user('admin')
+@required_user(Role.ADMIN)
 def update_category(category_id):
     category = Categories.get_by_id(category_id)
     if not category:

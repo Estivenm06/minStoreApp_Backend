@@ -55,7 +55,6 @@ def required_user(*roles):
             current_user = getattr(g, 'current_user', None)
             if current_user is None:
                 return jsonify({'success': False, 'error': 'You do not have the required permissions.'}), 401
-
             if current_user.role.lower() not in allowed_roles:
                 return jsonify({'success': False, 'error': 'You do not have enough permissions to access this resource.'}), 403
 

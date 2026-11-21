@@ -1,3 +1,5 @@
+from datetime import UTC, datetime
+
 from sqlalchemy import Column, Date, Float, ForeignKey, Integer, String, func
 
 from src.models import Base, session
@@ -23,14 +25,14 @@ class Invoices(Base):
     id_client = Column(ForeignKey('clients.id'), nullable=False)
     id_user = Column(ForeignKey('users.id'), nullable=False)
     invoice_number = Column(String(20), nullable=False, unique=True)
-    date_issued = Column(Date, nullable=False, default=func.current_date())
+    date_issued = Column(Date, nullable=False)
     subtotal = Column(Float(12, 2), nullable=False)
     tax = Column(Float(12, 2), nullable=False, default=0.00)
     total = Column(Float(12, 2), nullable=False)
     payment_method = Column(String(20), nullable=False)
     status = Column(String(20), nullable=False, default=Status.PENDING)
 
-    def __init__(self, id_client, id_user, invoice_number, subtotal, tax, total, payment_method, status=Status.PENDING):
+    def __init__(self, id_client, id_user, invoice_number, subtotal, tax, total, payment_method, status=Status.PENDING, date_issued=None):
         self.id_client = id_client
         self.id_user = id_user
         self.invoice_number = invoice_number
@@ -38,6 +40,7 @@ class Invoices(Base):
         self.tax = tax
         self.total = total
         self.payment_method = payment_method
+        self.date_issued = date_issued or datetime.now(UTC)
         self.status = status
 
     def __repr__(self):
@@ -46,9 +49,14 @@ class Invoices(Base):
     def get_all():
         return session.query(Invoices).all()
 
-    def get_paginted(page, per_page):
+    def get_paginated(page, per_page):
         invoices = session.query(Invoices).offset((page - 1) * per_page).limit(per_page).all()
         total_invoices_count = session.query(func.count(Invoices.id)).scalar()
+        return invoices, total_invoices_count
+
+    def get_paginated_by_user(user_id, page, per_page):
+        invoices = session.query(Invoices).filter_by(id_user=user_id).offset((page - 1) * per_page).limit(per_page).all()
+        total_invoices_count = session.query(func.count(Invoices.id)).filter_by(id_user=user_id).scalar()
         return invoices, total_invoices_count
 
     def get_by_id(invoice_id):
@@ -67,5 +75,5 @@ class Invoices(Base):
         session.add(self)
         session.commit()
 
-    def update_invoice(self):
+    def update(self):
         session.commit()
