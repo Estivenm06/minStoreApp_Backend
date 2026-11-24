@@ -18,9 +18,9 @@ def validator_data(required_fields, data, update):
         else:
             existing_product = Products.get_by_name(data['name']) if key == 'name' else None
             if update and existing_product:
-                errors.append({key: f"{data[key]} already exists"})
+                errors.append({key: "The product you want to update already exists"})
             if not update and existing_product:
-                errors.append({key: f"{data[key]} must be unique"})
+                errors.append({key: "The product you want to create already exists"})
 
     for key in ['price_sell', 'price_buy', 'id_category', 'id_supplier']:
         if key in data:
@@ -35,5 +35,5 @@ def validator_data(required_fields, data, update):
         return jsonify({
             'success': False,
             'message': 'Validation error',
-            'validation_error': {errors}
+            'validation_error': errors
         }), 400

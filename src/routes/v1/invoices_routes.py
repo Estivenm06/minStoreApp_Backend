@@ -181,32 +181,64 @@ def update_invoice(invoice_id):
             'success': False,
             'message': 'No valid fields provided for update'
         }), 400
-    if id_user:
-        user = Users.get_user_by_id(id_user)
-        if not user:
-            return jsonify({
+
+    if invoice.id_client != id_client and id_client is not None:
+        return jsonify({
+            'success': False,
+            'message': 'You cannot change the client of an invoice'
+        }), 400
+
+    if invoice.id_user != id_user and id_user is not None:
+        return jsonify({
+            'success': False,
+            'message': 'You cannot change the user of an invoice'
+        }), 400
+
+    if invoice.status != status and status is not None and status not in [Status.PENDING, Status.PAID, Status.CANCELLED]:
+        return jsonify({
+            'success': False,
+            'message': f'Invalid status: {status}. Valid statuses are: {Status.PENDING}, {Status.PAID}, {Status.CANCELLED}'
+        }), 400
+
+    if invoice.status == Status.PAID and status == Status.CANCELLED:
+        return jsonify({
+            'success': False,
+            'message': 'You cannot change the status of a paid invoice to cancelled'
+        }), 400
+
+    if invoice.status == Status.CANCELLED and status == Status.PAID:
+        return jsonify({
+            'success': False,
+            'message': 'You cannot change the status of a cancelled invoice to paid'
+        }), 400
+
+    if invoice.status == status and status is not None:
+        return jsonify({
+            'success': False,
+            'message': f'Invoice is already in status {status}'
+        }), 400
+    
+    user = Users.get_user_by_id(id_user)
+    client = Clients.get_by_id(id_client)
+    existing_invoice = Invoices.get_by_invoice_number(invoice_number)
+
+    if not user:
+        return jsonify({
                 'success': False,
                 'message': f'User with id {id_user} not found'
             }), 404
-    if id_client:
-        client = Clients.get_by_id(id_client)
-        if not client:
+    if not client:
             return jsonify({
                 'success': False,
                 'message': f'Client with id {id_client} not found'
             }), 404
-    if invoice_number:
-        existing_invoice = Invoices.get_by_invoice_number(invoice_number)
-        if existing_invoice and existing_invoice.id != invoice_id:
+
+    if existing_invoice and existing_invoice.id != invoice_id:
             return jsonify({
                 'success': False,
                 'message': f'Invoice with number {invoice_number} already exists, you cannot update to this number'
             }), 400
-        if existing_invoice and status == existing_invoice.status:
-            return jsonify({
-                'success': False,
-                'message': f'Invoice with number {invoice_number} already has the same status, you cannot update to this status'
-            }), 400
+
 
     invoice.status = data.get('status', invoice.status)
 

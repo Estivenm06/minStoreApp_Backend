@@ -161,6 +161,11 @@ def update_detailed_invoice(detailed_invoice_id):
     if not data:
         errors.append('No input data provided')
 
+    if detailed_invoice.id_invoice != data.get('id_invoice'):
+        errors.append('You cannot change the invoice of a detailed invoice')
+
+    if detailed_invoice.id_product != data.get('id_product'):
+        errors.append('You cannot change the product of a detailed invoice')
 
     if detailed_invoice.id_invoice != data.get('id_invoice', detailed_invoice.id_invoice) or \
        detailed_invoice.id_product != data.get('id_product', detailed_invoice.id_product):
